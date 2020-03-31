@@ -116,6 +116,7 @@ def wfromtable(q2: float, coltable: ndarray) -> float:
 def interpolate_projection(
     x: ndarray,
     y: ndarray,
+    z: ndarray,
     hh: ndarray,
     weight: ndarray,
     dat: ndarray,
@@ -128,6 +129,8 @@ def interpolate_projection(
     pixwidthx: float,
     pixwidthy: float,
     normalise: bool,
+    dscreen: float,
+    zobserver: float,
 ) -> ndarray:
     """Interpolate particles to grid via projection.
 
@@ -137,6 +140,8 @@ def interpolate_projection(
         The particle x positions.
     y
         The particle y positions.
+    z
+        The particle z positions.
     hh
         The particle smoothing length.
     weight
@@ -157,6 +162,11 @@ def interpolate_projection(
         The number of pixels in the y direction.
     normalise
         Whether to normalize.
+    dscreen
+        The distance from observer to screen (for perspective
+        rendering). If 0.0, then do not use perspective rendering.
+    zobserver
+        The z-position of the observer (for perspective rendering).
 
     Return
     ------
@@ -170,6 +180,8 @@ def interpolate_projection(
     dx2i = np.zeros(npixx)
     xpix = np.zeros(npixx)
     term = 0.0
+
+    use_perspective = np.abs(dscreen) > 0
 
     xminpix = xmin - 0.5 * pixwidthx
     yminpix = ymin - 0.5 * pixwidthy
@@ -197,6 +209,13 @@ def interpolate_projection(
         horigi = hi
         if not hi > 0.0:
             continue
+
+        if use_perspective:
+            # Skip particles outside of perspective
+            if z[idx] > zobserver:
+                continue
+            zfrac = np.abs(dscreen / (z[idx] - zobserver))
+            hi = hi * zfrac
 
         # Radius of the smoothing kernel
         radkern = RADKERNEL * hi
