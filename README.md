@@ -24,7 +24,7 @@ Python 3.6+ with [numpy](https://numpy.org/) and [numba](http://numba.pydata.org
 To-do
 -----
 
-- [ ] add license
+- [x] add license
 - [ ] add tests
 - [x] modularise code
 - [x] add non-Cartesian interpolation
