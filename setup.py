@@ -8,7 +8,7 @@ from setuptools import setup
 
 __version__ = re.search(
     r'__version__\s*=\s*[\'"]([^\'"]*)[\'"]',  # It excludes inline comment too
-    io.open('sph-interp/__init__.py', encoding='utf_8_sig').read(),
+    io.open('sphinterp/__init__.py', encoding='utf_8_sig').read(),
 ).group(1)
 
 install_requires = ['numba', 'numpy']
