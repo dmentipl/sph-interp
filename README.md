@@ -1,9 +1,11 @@
-pysplash
-========
+sph-interp
+==========
 
 > Smoothed particle hydrodynamics interpolation to a grid.
 
-Splash in pure Python with numba. All algorithms and numerical methods are derived from Splash. See <https://github.com/danieljprice/splash>.
+The core interpolation functions are derived from the Splash Fortran code rewritten in Python with numba for performance.
+
+For the original Splash source code, see <https://github.com/danieljprice/splash>.
 
 Install
 -------
@@ -11,8 +13,8 @@ Install
 Install from source.
 
 ```bash
-git clone https://github.com/dmentipl/pysplash
-cd pysplash
+git clone https://github.com/dmentipl/sph-interp
+cd sph-interp
 pip install -e .
 ```
 

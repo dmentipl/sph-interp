@@ -1,4 +1,4 @@
-"""pysplash setup.py."""
+"""sph-interp setup.py."""
 
 import io
 import pathlib
@@ -8,21 +8,21 @@ from setuptools import setup
 
 __version__ = re.search(
     r'__version__\s*=\s*[\'"]([^\'"]*)[\'"]',  # It excludes inline comment too
-    io.open('pysplash/__init__.py', encoding='utf_8_sig').read(),
+    io.open('sph-interp/__init__.py', encoding='utf_8_sig').read(),
 ).group(1)
 
 install_requires = ['numba', 'numpy']
-packages = ['pysplash']
+packages = ['sphinterp']
 
 description = 'Smoothed particle hydrodynamics interpolation to a grid.'
 long_description = (pathlib.Path(__file__).parent / 'README.md').read_text()
 
 setup(
-    name='pysplash',
+    name='sphinterp',
     version=__version__,
     author='Daniel Mentiplay',
     author_email='d.mentiplay@gmail.com',
-    url='https://github.com/dmentipl/pysplash',
+    url='https://github.com/dmentipl/sph-interp',
     description=description,
     long_description=long_description,
     long_description_content_type='text/markdown',

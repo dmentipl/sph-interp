@@ -1,15 +1,13 @@
 """
-Pysplash
-========
-
-Splash in pure Python with numba. Specifically:
+sph-interp
+==========
 
 > Smoothed particle hydrodynamics interpolation to a grid.
 
 The core interpolation functions are derived from the Splash Fortran
 code rewritten in Python with numba for performance.
 
-All algorithms and numerical methods are derived from Splash. See
+For the original Splash source code, see
 <https://github.com/danieljprice/splash>.
 """
 
