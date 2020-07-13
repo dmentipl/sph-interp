@@ -11,13 +11,8 @@ __version__ = re.search(
     io.open('pysplash.py', encoding='utf_8_sig').read(),
 ).group(1)
 
-install_requires = [
-    'numba',
-    'numpy',
-]
-packages = [
-    'pysplash',
-]
+install_requires = ['numba', 'numpy']
+packages = ['pysplash']
 
 description = 'Smoothed particle hydrodynamics interpolation to a grid.'
 long_description = (pathlib.Path(__file__).parent / 'README.md').read_text()
