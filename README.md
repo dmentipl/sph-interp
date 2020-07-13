@@ -7,6 +7,21 @@ The core interpolation functions are derived from the Splash Fortran code rewrit
 
 For the original Splash source code, see <https://github.com/danieljprice/splash>.
 
+Usage
+-----
+
+Import sph-interp.
+
+```python
+>>> import sphinterp as interp
+```
+
+Interpolate particles via projection.
+
+```python
+>>> pixel_grid = interp.projection(x, y, z, h, weight, data, ...)
+```
+
 Install
 -------
 
@@ -22,6 +37,18 @@ Requirements
 ------------
 
 Python 3.6+ with [numpy](https://numpy.org/) and [numba](http://numba.pydata.org/).
+
+License
+-------
+
+sph-interp is licensed under GPL-2.0 following Splash. See [LICENSE](https://github.com/dmentipl/sph-interp/blob/master/LICENSE) for details.
+
+Citation
+--------
+
+If you use sph-interp in a publication, please cite the [Splash paper](https://ui.adsabs.harvard.edu/abs/2007PASA...24..159P).
+
+> Price, D. J., 2007, PASA, 24, 159
 
 To-do
 -----
