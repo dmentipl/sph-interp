@@ -7,12 +7,12 @@ import numba
 import numpy as np
 from numpy import ndarray
 
-from .coordinates import coord_transform, get_coord_info, get_pixel_limits
-from .kernels import CNORMK3D, RADKERNEL, RADKERNEL2, w_cubic
+from ._coordinates import coord_transform, get_coord_info, get_pixel_limits
+from ._kernels import CNORMK3D, RADKERNEL, RADKERNEL2, w_cubic
 
 
 @numba.njit
-def interpolate_cross_section(
+def cross_section(
     x: ndarray,
     y: ndarray,
     z: ndarray,
@@ -152,7 +152,7 @@ def interpolate_cross_section(
 
 
 @numba.njit
-def interpolate_cross_section_non_cartesian(
+def cross_section_non_cartesian(
     x: ndarray,
     y: ndarray,
     z: ndarray,

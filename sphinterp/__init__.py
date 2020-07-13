@@ -14,8 +14,5 @@ For the original Splash source code, see
 # Canonical version number
 __version__ = '0.0.1'
 
-from .cross_section import (
-    interpolate_cross_section,
-    interpolate_cross_section_non_cartesian,
-)
-from .projection import interpolate_projection, interpolate_projection_non_cartesian
+from ._cross_section import cross_section, cross_section_non_cartesian
+from ._projection import projection, projection_non_cartesian

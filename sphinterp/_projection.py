@@ -7,12 +7,12 @@ import numba
 import numpy as np
 from numpy import ndarray
 
-from .coordinates import coord_transform, get_coord_info, get_pixel_limits
-from .kernels import RADKERNEL, RADKERNEL2, setup_integratedkernel, wfromtable
+from ._coordinates import coord_transform, get_coord_info, get_pixel_limits
+from ._kernels import RADKERNEL, RADKERNEL2, setup_integratedkernel, wfromtable
 
 
 @numba.njit
-def interpolate_projection(
+def projection(
     x: ndarray,
     y: ndarray,
     z: ndarray,
@@ -210,7 +210,7 @@ def interpolate_projection(
 
 
 @numba.njit
-def interpolate_projection_non_cartesian(
+def projection_non_cartesian(
     x: ndarray,
     y: ndarray,
     z: ndarray,
