@@ -16,7 +16,8 @@ All algorithms and numerical methods are derived from Splash. See
 # Canonical version number
 __version__ = '0.0.1'
 
-from .cross_section import (interpolate_cross_section,
-                            interpolate_cross_section_non_cartesian)
-from .projection import (interpolate_projection,
-                         interpolate_projection_non_cartesian)
+from .cross_section import (
+    interpolate_cross_section,
+    interpolate_cross_section_non_cartesian,
+)
+from .projection import interpolate_projection, interpolate_projection_non_cartesian
