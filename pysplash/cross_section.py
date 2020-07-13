@@ -7,8 +7,8 @@ import numba
 import numpy as np
 from numpy import ndarray
 
-from .kernels import w_cubic, RADKERNEL, RADKERNEL2, CNORMK3D
 from .coordinates import coord_transform, get_coord_info, get_pixel_limits
+from .kernels import CNORMK3D, RADKERNEL, RADKERNEL2, w_cubic
 
 
 @numba.njit
