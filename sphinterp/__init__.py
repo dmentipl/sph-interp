@@ -4,8 +4,9 @@ sph-interp
 
 > Smoothed particle hydrodynamics interpolation to a grid.
 
-The core interpolation functions are derived from the Splash Fortran
-code rewritten in Python with numba for performance.
+The core functionality of sph-interp is a set of interpolation functions
+derived from the Splash Fortran code rewritten in Python. It uses numba,
+a Python JIT compiler, for performance on par with the Fortran code.
 
 For the original Splash source code, see
 <https://github.com/danieljprice/splash>.
