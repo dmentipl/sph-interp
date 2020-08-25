@@ -25,6 +25,12 @@ Interpolate particles via projection.
 Install
 -------
 
+Install from PyPI with pip.
+
+```bash
+python -m pip install sphinterp
+```
+
 Install from source.
 
 ```bash
