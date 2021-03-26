@@ -1,0 +1,23 @@
+# Conda environment for sph-interp usage and development
+#
+# Install:    conda env create --file environment.yml
+# Update:     conda env update --file environment.yml
+# Activate:   conda activate sphinterp
+# Deactivate: conda deactivate
+
+name: sphinterp
+
+channels:
+  - conda-forge
+
+dependencies:
+  - python>=3.6
+  - black
+  - ipython
+  - isort>=5.0
+  - mypy
+  - numba
+  - numpy
+  - pydocstyle
+  - pylint
+  - pytest

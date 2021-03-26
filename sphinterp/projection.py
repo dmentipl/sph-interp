@@ -7,8 +7,82 @@ import numba
 import numpy as np
 from numpy import ndarray
 
-from ._coordinates import coord_transform, get_coord_info, get_pixel_limits
-from ._kernels import RADKERNEL, RADKERNEL2, setup_integratedkernel, wfromtable
+from .coordinates import coord_transform, get_coord_info, get_pixel_limits
+from . import kernel
+
+FUNCTION = kernel.FUNCTION['cubic']
+RADIUS = kernel.RADIUS['cubic']
+NORM = kernel.NORM['cubic']
+
+MAXCOLTABLE = 1000
+DQ2TABLE = RADIUS ** 2 / MAXCOLTABLE
+DDQ2TABLE = 1.0 / DQ2TABLE
+
+
+@numba.njit
+def setup_integrated_kernel_cubic():
+    """Set up integrated kernel.
+
+    Tabulates the integral through the cubic spline kernel tabulated in
+    (r/h)**2 so that sqrt is not necessary.
+
+    Returns
+    -------
+    coltable
+    """
+    npts = 100
+    radkernel2 = RADIUS ** 2
+    coltable = np.zeros(MAXCOLTABLE + 1)
+
+    for idx in range(MAXCOLTABLE):
+        # Tabulate for (cylindrical) r**2 between 0 and RADIUS**2
+        rxy2 = idx * DQ2TABLE
+
+        # Integrate z between 0 and sqrt(RADIUS^2 - rxy^2)
+        deltaz = np.sqrt(radkernel2 - rxy2)
+        dz = deltaz / (npts - 1)
+        coldens = 0
+        for j in range(npts):
+            z = j * dz
+            q2 = rxy2 + z * z
+            wkern = FUNCTION(np.sqrt(q2))
+            if j in (0, npts - 1):
+                coldens = coldens + 0.5 * wkern * dz
+            else:
+                coldens = coldens + wkern * dz
+        coltable[idx] = 2.0 * coldens * NORM
+    coltable[MAXCOLTABLE] = 0.0
+
+    return coltable
+
+
+COLTABLE = setup_integrated_kernel_cubic()
+
+
+@numba.njit
+def kernel_cubic_integrated(q2):
+    """Interpolate from integrated kernel table values to give w(q).
+
+    Parameters
+    ----------
+    q2
+
+    Returns
+    -------
+    w
+    """
+    # Find nearest index in table
+    index = int(q2 * DDQ2TABLE)
+    index1 = min(index, MAXCOLTABLE)
+
+    # Find increment along from this index
+    dxx = q2 - index * DQ2TABLE
+
+    # Find gradient
+    dwdx = (COLTABLE[index1] - COLTABLE[index]) * DDQ2TABLE
+
+    # Compute value of integrated kernel
+    return COLTABLE[index] + dwdx * dxx
 
 
 @numba.njit
@@ -72,13 +146,12 @@ def projection(
     datsmooth
         The data smoothed to a pixel grid.
     """
-    coltable = setup_integratedkernel()
-
     datsmooth = np.zeros((npixx, npixy))
     datnorm = np.zeros((npixx, npixy))
     dx2i = np.zeros(npixx)
     xpix = np.zeros(npixx)
     term = 0.0
+    radkernel2 = RADIUS ** 2
 
     use_perspective = np.abs(dscreen) > 0
 
@@ -117,7 +190,7 @@ def projection(
             hi = hi * zfrac
 
         # Radius of the smoothing kernel
-        radkern = RADKERNEL * hi
+        radkern = RADIUS * hi
 
         # Cycle as soon as we know the particle does not contribute
         xi = x[idx]
@@ -144,7 +217,7 @@ def projection(
         else:
             hsmooth = hi
             nok = nok + 1
-        radkern = RADKERNEL * hsmooth
+        radkern = RADIUS * hsmooth
 
         # Set kernel related quantities
         hi1 = 1.0 / hsmooth
@@ -183,8 +256,8 @@ def projection(
                 q2 = dx2i[ipix] + dy2
                 # SPH kernel - integral through cubic spline
                 # interpolate from a pre-calculated table
-                if q2 < RADKERNEL2:
-                    wab = wfromtable(q2, coltable)
+                if q2 < radkernel2:
+                    wab = kernel_cubic_integrated(q2)
                     # Calculate data value at this pixel using the summation interpolant
                     datsmooth[ipix, jpix] = datsmooth[ipix, jpix] + term * wab
                     if normalise:
@@ -292,12 +365,11 @@ def projection_non_cartesian(
     datsmooth = np.zeros((npixx, npixy))
     datnorm = np.zeros((npixx, npixy))
     term = 0.0
+    radkernel2 = RADIUS ** 2
 
     ixcoord, iycoord, izcoord, islengthx, islengthy, islengthz = get_coord_info(
         iplotx, iploty, iplotz, igeom
     )
-
-    coltable = setup_integratedkernel()
 
     xpix = np.zeros(npixx)
     xci = np.zeros(3)
@@ -328,7 +400,7 @@ def projection_non_cartesian(
         hi = max(horigi, hmin)
 
         # Radius of the smoothing kernel
-        radkern = RADKERNEL * hi
+        radkern = RADIUS * hi
 
         # Get limits of contribution from particle in cartesian space
         # xci is position in cartesian coordinates
@@ -393,8 +465,8 @@ def projection_non_cartesian(
 
                 # SPH kernel - integral through cubic spline
                 # interpolate from a pre-calculated table
-                if q2 < RADKERNEL2:
-                    wab = wfromtable(q2, coltable)
+                if q2 < radkernel2:
+                    wab = kernel_cubic_integrated(q2)
                     # Calculate data value at this pixel using the summation interpolant
                     datsmooth[ip, jp] = datsmooth[ip, jp] + term * wab
                     if normalise:

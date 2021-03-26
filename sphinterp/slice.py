@@ -7,12 +7,16 @@ import numba
 import numpy as np
 from numpy import ndarray
 
-from ._coordinates import coord_transform, get_coord_info, get_pixel_limits
-from ._kernels import CNORMK3D, RADKERNEL, RADKERNEL2, w_cubic
+from .coordinates import coord_transform, get_coord_info, get_pixel_limits
+from . import kernel
+
+FUNCTION = kernel.FUNCTION['cubic']
+RADIUS = kernel.RADIUS['cubic']
+NORM = kernel.NORM['cubic']
 
 
 @numba.njit
-def cross_section(
+def slice(
     x: ndarray,
     y: ndarray,
     z: ndarray,
@@ -71,7 +75,7 @@ def cross_section(
     datsmooth = np.zeros((npixx, npixy))
     datnorm = np.zeros((npixx, npixy))
     dx2i = np.zeros(npixx)
-    const = CNORMK3D
+    radkern2 = RADIUS ** 2
 
     # Loop over particles
     for idx in range(npart):
@@ -86,7 +90,7 @@ def cross_section(
             continue
         hi1 = 1.0 / hi
         hi21 = hi1 * hi1
-        radkern = RADKERNEL * hi
+        radkern = RADIUS * hi
 
         # For each particle, work out distance from the cross section slice
         dz = zslice - z[idx]
@@ -94,11 +98,11 @@ def cross_section(
 
         # If this is < 2h then add the particle's contribution to the pixels
         # otherwise skip all this and start on the next particle
-        if dz2 < RADKERNEL2:
+        if dz2 < radkern2:
 
             xi = x[idx]
             yi = y[idx]
-            termnorm = const * weight[idx]
+            termnorm = NORM * weight[idx]
             term = termnorm * dat[idx]
 
             # Loop over pixels, adding the contribution from this particle
@@ -131,8 +135,8 @@ def cross_section(
                 for ipix in range(ipixmin, ipixmax):
                     q2 = dx2i[ipix] + dy2
                     # SPH kernel - cubic spline
-                    if q2 < RADKERNEL2:
-                        wab = w_cubic(q2)
+                    if q2 < radkern2:
+                        wab = FUNCTION(np.sqrt(q2))
                         # Calculate data value at this pixel using the summation
                         # interpolant
                         datsmooth[ipix, jpix] = datsmooth[ipix, jpix] + term * wab
@@ -152,7 +156,7 @@ def cross_section(
 
 
 @numba.njit
-def cross_section_non_cartesian(
+def slice_non_cartesian(
     x: ndarray,
     y: ndarray,
     z: ndarray,
@@ -237,7 +241,7 @@ def cross_section_non_cartesian(
     datsmooth = np.zeros((npixx, npixy))
     datnorm = np.zeros((npixx, npixy))
 
-    const = CNORMK3D
+    radkern2 = RADIUS ** 2
 
     ixcoord, iycoord, izcoord, islengthx, islengthy, islengthz = get_coord_info(
         iplotx, iploty, iplotz, igeom
@@ -266,7 +270,7 @@ def cross_section_non_cartesian(
             continue
 
         # Radius of the smoothing kernel
-        radkern = RADKERNEL * hi
+        radkern = RADIUS * hi
 
         # Set kernel related quantities
         hi1 = 1 / hi
@@ -279,7 +283,7 @@ def cross_section_non_cartesian(
 
         # If this is < 2h then add the particle's contribution to the pixels
         # otherwise skip all this and start on the next particle
-        if dz2 < RADKERNEL2:
+        if dz2 < radkern2:
 
             # Get limits of contribution from particle in cartesian space
             # xci is position in cartesian coordinates
@@ -302,7 +306,7 @@ def cross_section_non_cartesian(
             if ierr != 0:
                 continue
 
-            termnorm = const * weight[idx]
+            termnorm = NORM * weight[idx]
             term = termnorm * dat[idx]
 
             # Loop over pixels, adding the contribution from this particle
@@ -327,8 +331,8 @@ def cross_section_non_cartesian(
 
                     # SPH kernel - integral through cubic spline
                     # interpolate from a pre-calculated table
-                    if q2 < RADKERNEL2:
-                        wab = w_cubic(q2)
+                    if q2 < radkern2:
+                        wab = FUNCTION(np.sqrt(q2))
                         # Calculate data value at this pixel using the summation
                         # interpolant
                         datsmooth[ip, jp] = datsmooth[ip, jp] + term * wab
